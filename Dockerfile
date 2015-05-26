@@ -30,7 +30,7 @@ RUN sudo apt-get install -y nodejs
 
 # Installing Postgresql 9.4
 RUN groupadd -r postgres && useradd -r -g postgres postgres
-RUN locale-gen en_US en_US.UTF-8 
+RUN locale-gen en_US en_US.UTF-8
 RUN dpkg-reconfigure locales
 RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
@@ -41,6 +41,3 @@ RUN apt-get install -y postgresql-contrib-9.4
 
 # cleanup downloaded files
 RUN apt-get clean
-
-#start psql
-RUN /etc/init.d/postgresql start

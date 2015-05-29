@@ -1,20 +1,24 @@
 FROM ubuntu:14.04
 
+# Note: The official Debian and Ubuntu images automatically ``apt-get clean``
+# after each ``apt-get``
+
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install base dependencies
-RUN apt-get install -y software-properties-common
-RUN apt-get install -y wget
-RUN apt-get install -y vim
-RUN apt-get install -y curl
+RUN apt-get update && apt-get install -y \
+  software-properties-common \
+  wget \
+  vim \
+  curl
 
 # Installing Oracle java 8 and set it as default
 RUN add-apt-repository -y ppa:webupd8team/java
-RUN apt-get update
 # auto accept Oracle license
 RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
-RUN apt-get install -y oracle-java8-installer
-RUN apt-get install -y oracle-java8-set-default
+RUN apt-get update && apt-get install -y \
+  oracle-java8-installer \
+  oracle-java8-set-default
 
 # Installing maven 3.3.3
 RUN wget --no-verbose -O /tmp/apache-maven-3.3.3.tar.gz http://archive.apache.org/dist/maven/maven-3/3.3.3/binaries/apache-maven-3.3.3-bin.tar.gz
@@ -26,18 +30,24 @@ ENV MAVEN_HOME /opt/maven
 
 # Installing Node.js v0.12
 RUN curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
-RUN sudo apt-get install -y nodejs
+RUN apt-get update && apt-get install -y nodejs
 
 # Installing Postgresql 9.4
-RUN groupadd -r postgres && useradd -r -g postgres postgres
-RUN locale-gen en_US en_US.UTF-8
-RUN dpkg-reconfigure locales
+RUN locale-gen en_US en_US.UTF-8 && dpkg-reconfigure locales
+ENV LANG en_US.UTF-8
+ENV LC_COLLATE en_US.UTF-8
+ENV LC_CTYPE en_US.UTF-8
+ENV PG_MAJOR 9.4
 RUN apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
-RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ wheezy-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
-RUN apt-get update
-RUN apt-get install -y postgresql-common
-RUN apt-get install -y postgresql-9.4
-RUN apt-get install -y postgresql-contrib-9.4
+RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main' > /etc/apt/sources.list.d/pgdg.list
+RUN apt-get update && apt-get install -y \
+  postgresql-$PG_MAJOR \
+  postgresql-common
 
-# cleanup downloaded files
-RUN apt-get clean
+ENV PATH /usr/lib/postgresql/$PG_MAJOR/bin:$PATH
+ENV PGDATA /var/lib/postgresql/$PG_MAJOR/main
+
+# Expose the PostgreSQL port
+EXPOSE 5432
+
+VOLUME ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]

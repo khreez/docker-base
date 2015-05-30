@@ -49,5 +49,3 @@ ENV PGDATA /var/lib/postgresql/$PG_MAJOR/main
 
 # Expose the PostgreSQL port
 EXPOSE 5432
-
-VOLUME ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
